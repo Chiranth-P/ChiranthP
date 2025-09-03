@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 public class WebhookResponse {
-   
-    @JsonProperty("webhook_url")
+
+    @JsonProperty("webhook")
     private String webhookUrl;
 
-    @JsonProperty("access_token")
+    @JsonProperty("accessToken")
     private String accessToken;
 }
