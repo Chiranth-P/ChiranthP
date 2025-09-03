@@ -3,6 +3,7 @@ package com.bajaj.test;
 import com.bajaj.test.model.SolutionRequest;
 import com.bajaj.test.model.WebhookRequest;
 import com.bajaj.test.model.WebhookResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -15,6 +16,7 @@ import org.springframework.web.client.RestTemplate;
 public class ChallengeRunner implements CommandLineRunner {
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void run(String... args) throws Exception {
@@ -39,19 +41,25 @@ public class ChallengeRunner implements CommandLineRunner {
         String url = "https://bfhldevapigw.healthrx.co.in/hiring/generateWebhook/JAVA";
 
         WebhookRequest requestBody = new WebhookRequest(
-                "John Doe",          
-                "REG12347",        
-                "john@example.com" 
+                "John Doe",
+                "1rf23is402",
+                "john@example.com"
         );
 
         System.out.println("Sending registration details to: " + url);
 
         try {
-            ResponseEntity<WebhookResponse> response = restTemplate.postForEntity(url, requestBody, WebhookResponse.class);
-            System.out.println("Status Code from Webhook Generation: " + response.getStatusCode());
-            return response.getBody();
+            ResponseEntity<String> responseAsString = restTemplate.postForEntity(url, requestBody, String.class);
+            System.out.println("Status Code from Webhook Generation: " + responseAsString.getStatusCode());
+            System.out.println("RAW Server Response: " + responseAsString.getBody());
+
+
+            WebhookResponse response = objectMapper.readValue(responseAsString.getBody(), WebhookResponse.class);
+            return response;
+
         } catch (Exception e) {
-            System.err.println("Error while generating webhook: " + e.getMessage());
+            System.err.println("Error while generating webhook or parsing the response: " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }
@@ -79,6 +87,7 @@ public class ChallengeRunner implements CommandLineRunner {
             System.out.println("--- Challenge Completed Successfully! ---");
         } catch (Exception e) {
             System.err.println("Error while submitting solution: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
